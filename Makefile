@@ -24,3 +24,5 @@ release:
 	docker build -t ${IMAGE}:${VERSION} -t ${IMAGE}:latest .
 	docker push ${IMAGE}:${VERSION}
 	docker push ${IMAGE}:latest
+
+.PHONY: build lint test release
