@@ -55,7 +55,11 @@ backend {{ $key }}
   option forwardfor
   option redispatch
 
+{{- if $backend.Cookie.Insert }}
+  cookie SKIPPER_AFFINITY insert indirect nocache
+{{- else }}
   cookie SKIPPER_AFFINITY prefix
+{{- end }}
 
 {{- range $endpoint := $backend.Endpoints }}
   server {{ $endpoint.Name }} {{ $endpoint.IP }}:{{ $endpoint.Port }} check cookie {{ $endpoint.Name }}

@@ -17,6 +17,9 @@ func TestSort(t *testing.T) {
 			{
 				Host: "www.example.com",
 				Path: "/foo/bar",
+				Cookie: backends.Cookie{
+					Insert: true,
+				},
 				Endpoints: []backends.Endpoint{
 					{
 						Name: "server3",
@@ -56,6 +59,8 @@ func TestSort(t *testing.T) {
 	})
 	assert.Nil(t, err)
 
+	assert.Contains(t, buffer.String(), "cookie SKIPPER_AFFINITY prefix")
+	assert.Contains(t, buffer.String(), "cookie SKIPPER_AFFINITY insert indirect nocache")
 	assert.Contains(t, buffer.String(), "server server1 1.1.1.1:80 check cookie server1")
 	assert.Contains(t, buffer.String(), "server server2 2.2.2.2:80 check cookie server2")
 	assert.Contains(t, buffer.String(), "server server3 3.3.3.3:80 check cookie server3")

@@ -7,7 +7,13 @@ type Backends map[string]Backend
 type Backend struct {
 	Host      string
 	Path      string
+	Cookie    Cookie
 	Endpoints []Endpoint
+}
+
+// Cookie behaviour eg. Insert a cookie.
+type Cookie struct {
+	Insert bool
 }
 
 // Endpoint which is grouped in to a backend.

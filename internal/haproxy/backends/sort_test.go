@@ -10,25 +10,25 @@ func TestSort(t *testing.T) {
 	b, err := New()
 	assert.Nil(t, err)
 
-	b.Add("www.example.com", "/", Endpoint{
+	b.Add("www.example.com", "/", false, Endpoint{
 		Name: "server1",
 		IP:   "1.1.1.1",
 		Port: "80",
 	})
 
-	b.Add("www.example.com", "/", Endpoint{
+	b.Add("www.example.com", "/", false, Endpoint{
 		Name: "server2",
 		IP:   "2.2.2.2",
 		Port: "80",
 	})
 
-	b.Add("www.example.com", "/foo/bar", Endpoint{
+	b.Add("www.example.com", "/foo/bar", false, Endpoint{
 		Name: "server3",
 		IP:   "3.3.3.3",
 		Port: "80",
 	})
 
-	b.Add("www.example.com", "/foo", Endpoint{
+	b.Add("www.example.com", "/foo", false, Endpoint{
 		Name: "server4",
 		IP:   "4.4.4.4",
 		Port: "80",

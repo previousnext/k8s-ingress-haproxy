@@ -59,9 +59,19 @@ func update(file string, port int, clientset *kubernetes.Clientset) error {
 					return errors.Wrap(err, "failed to get endpoint list")
 				}
 
+				// Don't insert a cookie by default.
+				cookie := false
+
+				// @todo, Update the annotation to follow Ingress conventions:
+				// https://docs.traefik.io/configuration/backends/kubernetes/#general-annotations
+				if _, ok := ingress.ObjectMeta.Annotations["cookieInsert"]; ok {
+					// Warning! This breaks cache.
+					cookie = true
+				}
+
 				for _, subnet := range endpoints.Subsets {
 					for _, address := range subnet.Addresses {
-						err = bcks.Add(rule.Host, path.Path, backends.Endpoint{
+						err = bcks.Add(rule.Host, path.Path, cookie, backends.Endpoint{
 							Name: address.Hostname,
 							IP:   address.IP,
 							// @todo, Remove hardcoded value.

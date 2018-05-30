@@ -12,8 +12,9 @@ func New() (Backends, error) {
 }
 
 // Add an endpoint to the HAProxy configuration.
-func (b Backends) Add(host, path string, endpoint Endpoint) error {
+func (b Backends) Add(host, path string, cookie bool, endpoint Endpoint) error {
 	bck := b.get(host, path)
+	bck.Cookie.Insert = cookie
 	bck.Endpoints = append(bck.Endpoints, endpoint)
 	return b.set(host, path, bck)
 }
