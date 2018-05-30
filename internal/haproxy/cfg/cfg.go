@@ -62,11 +62,13 @@ backend {{ $key }}
 {{- end }}
 {{ end }}`
 
+// GenerateParams passed to the Generate function.
 type GenerateParams struct {
 	Port     int
 	Backends []backends.Backend
 }
 
+// Generate the haproxy.cfg file.
 func Generate(w io.Writer, params GenerateParams) error {
 	tmpl, err := template.New("haproxy").Parse(tpl)
 	if err != nil {

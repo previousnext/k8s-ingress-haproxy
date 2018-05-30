@@ -12,14 +12,15 @@ func New() (Backends, error) {
 }
 
 // Add an endpoint to the HAProxy configuration.
-func (h Backends) Add(host, path string, endpoint Endpoint) error {
-	bck := h.get(host, path)
+func (b Backends) Add(host, path string, endpoint Endpoint) error {
+	bck := b.get(host, path)
 	bck.Endpoints = append(bck.Endpoints, endpoint)
-	return h.set(host, path, bck)
+	return b.set(host, path, bck)
 }
 
+// Helper function to get a backend.
 func (b Backends) get(host, path string) Backend {
-	key := b.key(host, path)
+	key := hash(host, path)
 
 	if val, ok := b[key]; ok {
 		return val
@@ -31,14 +32,15 @@ func (b Backends) get(host, path string) Backend {
 	}
 }
 
+// Helper function to set a backend.
 func (b Backends) set(host, path string, bck Backend) error {
-	key := b.key(host, path)
+	key := hash(host, path)
 	b[key] = bck
 	return nil
 }
 
-// Helper function to hash the
-func (h Backends) key(host, path string) string {
+// Helper function to create a hash based on host and path.
+func hash(host, path string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(fmt.Sprint(host, path)))
 	return hex.EncodeToString(hasher.Sum(nil))
