@@ -11,7 +11,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/previousnext/k8s-ingress-haproxy/internal/haproxy"
+	"github.com/previousnext/k8s-ingress-haproxy/internal/haproxy/backends"
+	"github.com/previousnext/k8s-ingress-haproxy/internal/haproxy/cfg"
 	"github.com/previousnext/k8s-ingress-haproxy/internal/writer"
 )
 
@@ -35,7 +36,7 @@ func Start(freq time.Duration, clientset *kubernetes.Clientset, port int, file s
 
 // Update HAProxy configuration.
 func update(file string, port int, clientset *kubernetes.Clientset) error {
-	h, err := haproxy.New(port)
+	bcks, err := backends.New()
 	if err != nil {
 		return errors.Wrap(err, "failed to init config builder")
 	}
@@ -60,7 +61,7 @@ func update(file string, port int, clientset *kubernetes.Clientset) error {
 
 				for _, subnet := range endpoints.Subsets {
 					for _, address := range subnet.Addresses {
-						err = h.Add(rule.Host, path.Path, haproxy.Endpoint{
+						err = bcks.Add(rule.Host, path.Path, backends.Endpoint{
 							Name: address.Hostname,
 							IP:   address.IP,
 							// @todo, Remove hardcoded value.
@@ -78,7 +79,10 @@ func update(file string, port int, clientset *kubernetes.Clientset) error {
 	var b bytes.Buffer
 
 	// Generate the HAProxy configuration file.
-	err = h.Generate(&b)
+	err = cfg.Generate(&b, cfg.GenerateParams{
+		Port:     port,
+		Backends: bcks.Sorted(),
+	})
 	if err != nil {
 		return errors.Wrap(err, "failed to generate configuration")
 	}
