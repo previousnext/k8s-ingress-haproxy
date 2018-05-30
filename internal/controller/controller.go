@@ -16,7 +16,7 @@ import (
 )
 
 // Start the new HAProxy controller.
-func Start(freq time.Duration, clientset *kubernetes.Clientset, port int, file string) {
+func Start(freq time.Duration, clientset *kubernetes.Clientset, port int, file string) error {
 	limiter := time.Tick(freq)
 
 	for {
@@ -29,6 +29,8 @@ func Start(freq time.Duration, clientset *kubernetes.Clientset, port int, file s
 			log.Println(err)
 		}
 	}
+
+	return nil
 }
 
 // Update HAProxy configuration.
