@@ -130,6 +130,16 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/gosuri/uitable"
+  packages = [
+    ".",
+    "util/strutil",
+    "util/wordwrap"
+  ]
+  revision = "36ee7e946282a3fb1cfecd476ddc9b35d8847e42"
+
+[[projects]]
+  branch = "master"
   name = "github.com/gregjones/httpcache"
   packages = [
     ".",
@@ -158,6 +168,12 @@
     "jwriter"
   ]
   revision = "8b799c424f57fa123fc63a99d6383bc6e4c02578"
+
+[[projects]]
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
+  version = "v0.0.2"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -194,6 +210,12 @@
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/previousnext/gopher"
+  packages = ["pkg/version"]
+  revision = "9de7883755280ca31974294beb85618f719e127e"
 
 [[projects]]
   name = "github.com/spf13/pflag"
@@ -386,6 +408,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "10e148e818c9b44a692f62907295e9d2927955b1e826e47fc0d1b05e9dffa91e"
+  inputs-digest = "60c95e44c784ebd02f2ff60218278f657b65427aabf1660cc0c0dc19a782bce2"
   solver-name = "gps-cdcl"
   solver-version = 1
