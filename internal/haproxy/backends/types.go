@@ -1,10 +1,6 @@
-package haproxy
+package backends
 
-// HAProxy service configuration.
-type HAProxy struct {
-	Port     int
-	Backends map[string]Backend
-}
+type Backends map[string]Backend
 
 // Backend is a set of servers that receives forwarded requests.
 type Backend struct {
