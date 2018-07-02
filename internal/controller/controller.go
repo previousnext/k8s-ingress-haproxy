@@ -3,10 +3,10 @@ package controller
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/prometheus/common/log"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -27,7 +27,7 @@ func Start(freq time.Duration, clientset *kubernetes.Clientset, port int, file s
 
 		err := update(file, port, clientset)
 		if err != nil {
-			log.Println(err)
+			log.Infoln(err)
 		}
 	}
 
@@ -71,8 +71,10 @@ func update(file string, port int, clientset *kubernetes.Clientset) error {
 
 				for _, subnet := range endpoints.Subsets {
 					for _, address := range subnet.Addresses {
+						log.With("host", rule.Host).With("path", path.Path).Infoln("Adding to list of backends")
+
 						err = bcks.Add(rule.Host, path.Path, cookie, backends.Endpoint{
-							Name: address.Hostname,
+							Name: address.TargetRef.Name,
 							IP:   address.IP,
 							// @todo, Remove hardcoded value.
 							Port: "80",
