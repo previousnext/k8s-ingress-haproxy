@@ -126,5 +126,5 @@ func getEndpoints(list *corev1.EndpointsList, namespace, name string) (corev1.En
 		return item, nil
 	}
 
-	return corev1.Endpoints{}, fmt.Errorf("not found: %s/%s\n", namespace, name)
+	return corev1.Endpoints{}, fmt.Errorf("not found: %s/%s", namespace, name)
 }
