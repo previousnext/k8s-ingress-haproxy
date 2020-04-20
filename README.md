@@ -5,7 +5,7 @@ Kubernetes Ingress Controller - HAProxy
 
 **Maintainer**: Nick Schuch
 
-This is a brief description on what the project does.
+Kubernetes Ingress Controller for HAPRoxy.
 
 ## Development
 
