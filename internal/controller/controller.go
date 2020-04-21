@@ -3,6 +3,7 @@ package controller
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/pkg/errors"
@@ -17,25 +18,27 @@ import (
 )
 
 // Start the new HAProxy controller.
-func Start(freq time.Duration, clientset *kubernetes.Clientset, port int, file string) error {
+func Start(w io.Writer, freq time.Duration, clientset *kubernetes.Clientset, port int, file string) error {
 	limiter := time.Tick(freq)
 
 	for {
 		<-limiter
 
-		fmt.Println("Collecting Ingress Rules")
+		fmt.Fprintln(w,"Starting loop")
 
-		err := update(file, port, clientset)
+		err := update(w, file, port, clientset)
 		if err != nil {
 			log.Infoln(err)
 		}
+
+		fmt.Fprintln(w,"Finished")
 	}
 
 	return nil
 }
 
 // Update HAProxy configuration.
-func update(file string, port int, clientset *kubernetes.Clientset) error {
+func update(w io.Writer, file string, port int, clientset *kubernetes.Clientset) error {
 	bcks, err := backends.New()
 	if err != nil {
 		return errors.Wrap(err, "failed to init config builder")
@@ -46,17 +49,23 @@ func update(file string, port int, clientset *kubernetes.Clientset) error {
 		return errors.Wrap(err, "failed to lookup ingress list")
 	}
 
+	endpoints, err := clientset.CoreV1().Endpoints(corev1.NamespaceAll).List(metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrap(err, "failed to get Endpoints list")
+	}
+
 	if len(ingresses.Items) <= 0 {
-		return errors.New("no Ingress objects were found")
+		fmt.Fprintln(w,"No Ingress objects were found")
+		return nil
 	}
 
 	// Merge Ingress -> Service -> Endpoints.
 	for _, ingress := range ingresses.Items {
 		for _, rule := range ingress.Spec.Rules {
 			for _, path := range rule.HTTP.Paths {
-				endpoints, err := clientset.CoreV1().Endpoints(ingress.ObjectMeta.Namespace).Get(path.Backend.ServiceName, metav1.GetOptions{})
+				endpoints, err := getEndpoints(endpoints, ingress.ObjectMeta.Namespace, path.Backend.ServiceName)
 				if err != nil {
-					return errors.Wrap(err, "failed to get endpoint list")
+					return errors.Wrap(err, "failed to get endpoints")
 				}
 
 				// Don't insert a cookie by default.
@@ -71,7 +80,7 @@ func update(file string, port int, clientset *kubernetes.Clientset) error {
 
 				for _, subnet := range endpoints.Subsets {
 					for _, address := range subnet.Addresses {
-						log.With("host", rule.Host).With("path", path.Path).Infoln("Adding to list of backends")
+						fmt.Fprintf(w, "Adding %s/%s to %s/%s backend list\n", address.TargetRef.Name, address.IP, rule.Host, path.Path)
 
 						err = bcks.Add(rule.Host, path.Path, cookie, backends.Endpoint{
 							Name: address.TargetRef.Name,
@@ -100,5 +109,22 @@ func update(file string, port int, clientset *kubernetes.Clientset) error {
 	}
 
 	// Update it for HAProxy to consume.
-	return writer.Update(b, file)
+	return writer.Update(w, b, file)
+}
+
+// Helper function to get an endpoint from a list.
+func getEndpoints(list *corev1.EndpointsList, namespace, name string) (corev1.Endpoints, error) {
+	for _, item := range list.Items {
+		if item.ObjectMeta.Namespace != namespace {
+			continue
+		}
+
+		if item.ObjectMeta.Name != name {
+			continue
+		}
+
+		return item, nil
+	}
+
+	return corev1.Endpoints{}, fmt.Errorf("not found: %s/%s", namespace, name)
 }

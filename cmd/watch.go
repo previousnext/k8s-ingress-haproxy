@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/alecthomas/kingpin"
@@ -31,7 +32,7 @@ func (cmd *cmdWatch) run(c *kingpin.ParseContext) error {
 		return errors.Wrap(err, "failed to get client")
 	}
 
-	return controller.Start(cmd.Frequency, clientset, cmd.Port, cmd.File)
+	return controller.Start(os.Stdout, cmd.Frequency, clientset, cmd.Port, cmd.File)
 }
 
 // Watch declares the "watch" sub command.

@@ -2,6 +2,8 @@ package writer
 
 import (
 	"bytes"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 
@@ -9,7 +11,7 @@ import (
 )
 
 // Update if the file has changed.
-func Update(update bytes.Buffer, file string) error {
+func Update(w io.Writer, update bytes.Buffer, file string) error {
 	// Check if the file has changed, if not, lets create it for the first time.
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		return write(update, file)
@@ -23,8 +25,11 @@ func Update(update bytes.Buffer, file string) error {
 
 	// Is this the same file?
 	if update.String() == string(existing) {
-		return errors.New("file has not changed")
+		fmt.Fprintf(w, "File has not changed")
+		return nil
 	}
+
+	fmt.Fprintf(w, "File has changed. Writing changes.")
 
 	// It is not, lets write update it.
 	return write(update, file)
